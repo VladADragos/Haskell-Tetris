@@ -103,9 +103,8 @@ blockCount (S shape )= length concatList - length emptyValues
 -- and are rectangular)
 prop_Shape :: Shape -> Bool
 prop_Shape (S x) 
-  | null x = False
-  | null (head x) = False
-  | length (concat x) `mod` length (head x) == 0 = True
+  | null x = False -- This Checks if the shape has at least a column and row
+  | length (concat x) `mod` length (head x) == 0 = True --This Checks if all the rows have the same length
   | otherwise = True
 
 -- * Test data generators
@@ -113,20 +112,20 @@ prop_Shape (S x)
 -- ** A05
 -- | A random generator for colours
 rColour :: Gen Colour
-rColour = error "A05 rColour undefined"
-
+rColour = elements [Black, Red, Green, Yellow, Blue, Purple, Cyan, Grey]
+  
 instance Arbitrary Colour where
-  arbitrary = rColour
+  arbitrary = rColourolour
 
 -- ** A06
 -- | A random generator for shapes
 rShape :: Gen Shape
-rShape = error "A06 rShape undefined"
-
-
+rShape = elements allShapes
+  
 instance Arbitrary Shape where
-  arbitrary = rShape
+  arbitrary = rShapee
 
+  
 -- * Transforming shapes
 
 -- ** A07
