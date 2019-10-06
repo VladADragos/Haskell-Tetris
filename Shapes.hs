@@ -104,7 +104,7 @@ blockCount (S shape )= length concatList - length emptyValues
 prop_Shape :: Shape -> Bool
 prop_Shape (S x) 
   | null x = False -- This Checks if the shape has at least a column and row
-  | length (concat x) `mod` length (head x) == 0 = True --This Checks if all the rows have the same length
+  | length (concat x) `mod` length (head x) == 1 = False --This Checks if all the rows have the same length
   | otherwise = True
 
 -- * Test data generators
@@ -115,7 +115,7 @@ rColour :: Gen Colour
 rColour = elements [Black, Red, Green, Yellow, Blue, Purple, Cyan, Grey]
   
 instance Arbitrary Colour where
-  arbitrary = rColourolour
+  arbitrary = rColour
 
 -- ** A06
 -- | A random generator for shapes
@@ -123,7 +123,7 @@ rShape :: Gen Shape
 rShape = elements allShapes
   
 instance Arbitrary Shape where
-  arbitrary = rShapee
+  arbitrary = rShape
 
   
 -- * Transforming shapes
@@ -131,22 +131,36 @@ instance Arbitrary Shape where
 -- ** A07
 -- | Rotate a shape 90 degrees
 rotateShape :: Shape -> Shape
-rotateShape = error "A07 rotateShape undefined"
+rotateShape (S shape) = S (map reverse (transpose shape))
 
 -- ** A08
 -- | shiftShape adds empty squares above and to the left of the shape
 shiftShape :: (Int,Int) -> Shape -> Shape
-shiftShape = error "A08 shiftShape undefined"
+shiftShape (x, y) (S shape) = S (shiftRight x (shiftDown y shape))
+  where
+    shiftRight dist =
+      map (emptyRow dist ++ )
+    shiftDown dist shape = 
+      replicate dist (emptyRow (length (head shape))) ++ shape
 
 -- ** A09
 -- | padShape adds empty sqaure below and to the right of the shape
 padShape :: (Int,Int) -> Shape -> Shape
-padShape = error "A09 padShape undefined"
+padShape (x, y) (S shape) = S (shiftLeft x (shiftUp y shape))
+  where
+    shiftLeft dist =
+      map (++ emptyRow dist)
+    shiftUp dist shape = 
+      shape ++ replicate dist (emptyRow (length (head shape)))
 
 -- ** A10
 -- | pad a shape to a given size
 padShapeTo :: (Int,Int) -> Shape -> Shape
-padShapeTo = error "A10 padShapeTo undefined"
+padShapeTo (x, y) shape = padShape (x - first shape, y - second shape) shape
+  where first shape  = fst (shapeSize shape)
+        second shape = snd (shapeSize shape)
+
+
 
 -- * Comparing and combining shapes
 
