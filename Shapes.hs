@@ -101,11 +101,21 @@ blockCount (S shape )= length concatList - length emptyValues
 -- ** A04
 -- | Shape invariant (shapes have at least one row, at least one column,
 -- and are rectangular)
+
 prop_Shape :: Shape -> Bool
-prop_Shape (S x) 
-  | null x = False -- This Checks if the shape has at least a column and row
-  | length (concat x) `mod` length (head x) == 1 = False --This Checks if all the rows have the same length
-  | otherwise = True
+prop_Shape (S rows) | null rows = False
+                    | isSameLength rows = True
+                    | otherwise = False
+  where isSameLength rows = all (==length(head rows)) (map length rows)
+  
+
+
+
+  
+
+    
+
+
 
 -- * Test data generators
 
@@ -168,15 +178,39 @@ padShapeTo (x, y) shape = padShape (x - first shape, y - second shape) shape
 
 -- | Test if two shapes overlap
 overlaps :: Shape -> Shape -> Bool
-s1 `overlaps` s2 = error "A11 overlaps undefined"
+overlaps (S row1) (S row2) = overlaps' row1  row2
+
+overlaps' (x:xs) (y:ys) | rowsOverlap x y = True
+                  | otherwise       = overlaps' xs ys
+overlaps' _ _                       = False
+
+
+
+rowsOverlap :: Row -> Row -> Bool
+rowsOverlap (x:xs) (y:ys) | isNothing x || isNothing y = rowsOverlap xs ys
+                          | otherwise                  = True
+rowsOverlap _ _                                        = False
 
 -- ** B02
 -- | zipShapeWith, like 'zipWith' for lists
 zipShapeWith :: (Square->Square->Square) -> Shape -> Shape -> Shape
-zipShapeWith = error "A12 zipShapeWith undefined"
+zipShapeWith f (S shape1) (S shape2) = S (zipWith (zipWith f) shape1 shape2)
+
+
+blackClashes :: Shape -> Shape -> Shape
+blackClashes shape1 shape2 = zipShapeWith clash shape1 shape2  
+  where clash :: Square -> Square -> Square 
+        clash Nothing Nothing = Nothing
+        clash Nothing s       = s
+        clash s       Nothing = s
+        clash (Just c1) (Just c2) = Just Black
 
 -- ** B03
 -- | Combine two shapes. The two shapes should not overlap.
 -- The resulting shape will be big enough to fit both shapes.
 combine :: Shape -> Shape -> Shape
-s1 `combine` s2 = error "A13 zipShapeWith undefined"
+combine shape1 shape2 = blackClashes (pad shape1 shape2) (pad shape2 shape1)
+  where
+    pad shape1 shape2 = padShapeTo ( width shape1 shape2, height shape1 shape2) shape1
+    height (S shape1) (S shape2) = max (length shape1) (length shape2) 
+    width  (S shape1) (S shape2) = max (length (head shape1)) (length (head shape2))
