@@ -105,9 +105,6 @@ randomFloatToIndex float = (round (float * 10)) `mod` 7
 
 
 
-
-
-
 -- | React to input. The function returns 'Nothing' when it's game over,
 -- and @'Just' (n,t)@, when the game continues in a new state @t@.
 stepTetris :: Action -> Tetris -> Maybe (Int,Tetris)
@@ -119,8 +116,7 @@ stepTetris a t
   | a == Rotate = Just (0, rotatePiece t)
   | otherwise = Just (0,t)
 
-  -- data Action = Tick | MoveLeft | MoveRight | MoveDown | Rotate
-  -- deriving ...
+
 
 move :: Vector -> Tetris -> Tetris
 move vector1 (Tetris (vector2,piece) well r) = Tetris (vector1 `vAdd` vector2,piece) well r 
